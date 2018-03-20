@@ -14,6 +14,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -94,12 +95,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        LatLng home = new LatLng(40.505449, -88.972851);
+        // Add a marker at my home and move the camera
+        LatLng sydney = new LatLng(-34, 151);  // Google maps home
+        LatLng home = new LatLng(40.505449, -88.972851); // My home
         float zoom = 15;
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, zoom));
+
+        // create an overlay at home address
+        GroundOverlayOptions homeOverlay = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.mipmap.overlaydroid))
+                .position(home, 25);
+        mMap.addGroundOverlay(homeOverlay);
+
         setMapLongClick(mMap);
         setPoiClick(mMap);
 
