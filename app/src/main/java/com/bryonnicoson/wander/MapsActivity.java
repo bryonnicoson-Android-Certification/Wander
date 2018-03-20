@@ -12,7 +12,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 
 import java.util.Locale;
 
@@ -78,7 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
-     *
+     * <p>
      * Zoom Levels
      * 1: World     5: Continent    10: City    15: Streets     20: Buildings
      */
@@ -93,6 +95,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, zoom));
         setMapLongClick(mMap);
+        setPoiClick(mMap);
     }
 
     /**
@@ -110,6 +113,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 map.addMarker(new MarkerOptions().position(latLng)
                         .title(getString(R.string.dropped_pin))
                         .snippet(snippet));
+            }
+        });
+    }
+
+    /**
+     * Handle default POI clicks by placing marker with latLng, name
+     *
+     * @param map
+     */
+    private void setPoiClick(final GoogleMap map) {
+        map.setOnPoiClickListener(new GoogleMap.OnPoiClickListener() {
+            @Override
+            public void onPoiClick(PointOfInterest poi) {
+                Marker poiMarker = mMap.addMarker(new MarkerOptions()
+                        .position(poi.latLng)
+                        .title(poi.name));
+                poiMarker.showInfoWindow();
             }
         });
     }
