@@ -17,7 +17,10 @@ import android.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.StreetViewPanorama;
+import com.google.android.gms.maps.StreetViewPanoramaOptions;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.SupportStreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,9 +42,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        // Create new runtime instance of SupportMapFragment & add to FrameLayout
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, mapFragment).commit();
+        // load the map
         mapFragment.getMapAsync(this);
     }
 
@@ -117,6 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setMapLongClick(mMap);
         setPoiClick(mMap);
         enableMyLocation();
+        setInfoWindowClickToPanorama(mMap);
 
         // style the map from raw json
         try {
@@ -164,6 +170,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Marker poiMarker = mMap.addMarker(new MarkerOptions()
                         .position(poi.latLng)
                         .title(poi.name));
+                poiMarker.setTag("poi");
                 poiMarker.showInfoWindow();
             }
         });
@@ -184,10 +191,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Check if location permissions are granted and if so enable the data location layer
-     *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -202,4 +205,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
         }
     }
+
+    /**
+     * set an info window click listener, check marker tag, if "poi", create streetview fragment
+     * @param map
+     */
+    private void setInfoWindowClickToPanorama(GoogleMap map) {
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                if (marker.getTag() == "poi") {
+                    StreetViewPanoramaOptions options = new StreetViewPanoramaOptions().position(
+                            marker.getPosition());
+                    SupportStreetViewPanoramaFragment streetViewFragment =
+                            SupportStreetViewPanoramaFragment.newInstance(options);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                            streetViewFragment).addToBackStack(null).commit();
+                }
+            }
+        });
+    }
+
 }
