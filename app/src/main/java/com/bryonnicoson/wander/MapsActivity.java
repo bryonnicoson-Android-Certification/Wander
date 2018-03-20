@@ -14,6 +14,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Locale;
+
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -30,6 +32,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Create the toolbar options menu to allow choice of menu type
+     *
      * @param menu the toolbar menu view provided by AppCompatActivity
      * @return true
      */
@@ -42,6 +45,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * Change the map type based on the user's selection
+     *
      * @param item - the menu item selected
      * @return true if map type set
      */
@@ -74,6 +78,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
+     *
+     * Zoom Levels
+     * 1: World     5: Continent    10: City    15: Streets     20: Buildings
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -81,7 +88,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng home = new LatLng(40.505449, -88.972851);
+        float zoom = 15;
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, zoom));
+        setMapLongClick(mMap);
+    }
+
+    /**
+     * Drop map markers on long click
+     *
+     * @param map - the clicked-upon map object
+     */
+    private void setMapLongClick(final GoogleMap map) {
+        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                String snippet = String.format(Locale.getDefault(),
+                        "Lat: %1$.5f, Long: %2$.5f", latLng.latitude, latLng.longitude);
+
+                map.addMarker(new MarkerOptions().position(latLng)
+                        .title(getString(R.string.dropped_pin))
+                        .snippet(snippet));
+            }
+        });
     }
 }
