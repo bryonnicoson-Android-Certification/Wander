@@ -1,8 +1,13 @@
 package com.bryonnicoson.wander;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +31,7 @@ import java.util.Locale;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private final static String TAG = MapsActivity.class.getSimpleName();
+    private final static int REQUEST_LOCATION_PERMISSION = 1;
 
     private GoogleMap mMap;
 
@@ -110,6 +116,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setMapLongClick(mMap);
         setPoiClick(mMap);
+        enableMyLocation();
 
         // style the map from raw json
         try {
@@ -160,5 +167,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 poiMarker.showInfoWindow();
             }
         });
+    }
+
+    /**
+     * if permission granted, enable location layer, else request permission
+     */
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]
+                    {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+        }
+    }
+
+    /**
+     * Check if location permissions are granted and if so enable the data location layer
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSION:
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    enableMyLocation();
+                    break;
+                }
+        }
     }
 }
